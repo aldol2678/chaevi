@@ -36,3 +36,6 @@ jobs:
 
       - name: Test
         run: npm test
+
+      - name: MCP transport regression
+        run: node --test tests/mcp-worker.test.mjs

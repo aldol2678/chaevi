@@ -1,0 +1,10 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import worker from "../mcp/worker.mjs";
+const request = (method,params={},id=1,origin) => worker.fetch(new Request("https://chaevi.example/mcp",{method:"POST",headers:{"content-type":"application/json",...(origin?{Origin:origin}:{})},body:JSON.stringify({jsonrpc:"2.0",id,method,params})}));
+test("initialize advertises stateless tools",async()=>{const r=await request("initialize",{protocolVersion:"2025-06-18"});assert.equal(r.status,200);const j=await r.json();assert.equal(j.result.protocolVersion,"2025-06-18");});
+test("lists three read-only tools",async()=>{const j=await(await request("tools/list")).json();assert.deepEqual(j.result.tools.map(t=>t.name),["route_task","recommend_goal_actions","get_capabilities"]);});
+test("routes repository changes without inventing a model",async()=>{const j=await(await request("tools/call",{name:"route_task",arguments:{task:"GitHub 저장소 코드를 수정하고 PR을 만들어줘"}})).json();assert.equal(j.result.structuredContent.execution_surface,"Codex");assert.equal(j.result.structuredContent.recommended_model,null);assert.equal(j.result.structuredContent.resource_resolution_state,"PROVISIONAL");});
+test("preserves existing product next-action classification",async()=>{const j=await(await request("tools/call",{name:"recommend_goal_actions",arguments:{goal:"작은 웹 제품 MVP를 개발하고 싶어"}})).json();assert.equal(j.result.structuredContent.actions[0].title,"사용자 문제와 성공기준 확정");assert.ok(j.result.structuredContent.actions.length<=5);});
+test("rejects invalid request and untrusted browser origins",async()=>{const bad=await worker.fetch(new Request("https://chaevi.example/mcp",{method:"POST",headers:{"content-type":"application/json"},body:"{"}));assert.equal(bad.status,400);const denied=await request("tools/list",{},1,"https://evil.example");assert.equal(denied.status,403);});
+test("health works and MCP GET is not exposed",async()=>{const health=await worker.fetch(new Request("https://chaevi.example/health"));assert.equal(health.status,200);const get=await worker.fetch(new Request("https://chaevi.example/mcp"));assert.equal(get.status,405);});
