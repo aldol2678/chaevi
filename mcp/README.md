@@ -21,6 +21,12 @@ npm run lint
 
 ## Deploy and connect
 
-Use a separate Cloudflare Worker `chaevi-mcp` from `mcp/worker.mjs` (ES module). After publishing and verifying HTTPS, connect the URL `https://<worker-host>/mcp` from ChatGPT web via **Plugins → Add custom MCP server**, subject to account availability. Set authentication to none **only because these tools are public and read-only**. Do not enable private data or write tools without authenticated authorization. Native ChatGPT mobile support is not guaranteed; always verify on the actual device/app separately.
+Cloudflare Worker `chaevi-mcp` deployed on 2026-10-22 from this branch and its public HTTPS health endpoint was verified independently.
+
+- Remote MCP: `https://chaevi-mcp.aldol-lab.workers.dev/mcp`
+- Health: `https://chaevi-mcp.aldol-lab.workers.dev/health`
+- ChatGPT private plugin: `https://chatgpt.com/plugins/plugins_6ad9d54f4ac48191a968c4a85af54648`
+
+Connect/install that private plugin in ChatGPT where supported. Plugin creation, endpoint health and an actual `tools/call` invocation are separate validation steps. Set authentication to none **only because these tools are public and read-only**. Do not enable private data or write tools without authenticated authorization. As of 2026-10-22, official ChatGPT custom-MCP documentation describes web support, not native mobile availability. Do not claim Android ChatGPT tool invocation is validated; verify separately if the platform changes.
 
 The Worker name/host used in deployment is operational state, not defined by this source file. Consult the deployment evidence before claiming it is live.
